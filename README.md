@@ -13,15 +13,15 @@ Optional: gjson package for extended functionality. To install, run:
 go get -u github.com/tidwall/gjson
 ```
 
-##Usage
+## Usage
 Save the code to a file, for example scan_har.go.
 
-Place a HAR file named example.har in the same directory as scan_har.go.
+Place a HAR file named `example.har` in the same directory as `main.go`.
 
 Run the program with the following command:
 
 ```bash
-go run scan_har.go
+go run main.go
 ```
 
 The program will scan all the cookies in all requests contained in the HAR file and flag potential session cookies that could be risky to share.
