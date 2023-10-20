@@ -82,7 +82,14 @@ func main() {
 
 // A function to check if a cookie name suggests it's a session cookie
 func isSessionCookie(name string) bool {
-	return name == "SESSIONID" || name == "JSESSIONID" || name == "ASP.NET_SessionId"
+	return name == "SESSIONID" ||
+		name == "JSESSIONID" ||
+		name == "ASP.NET_SessionId" ||
+		name == "okta-oauth-nonce" ||
+		name == "oktaStateToken" ||
+		name == "okta-oauth-state" ||
+		name == "srefresh" ||
+		name == "sid"
 }
 
 // A function to scramble a cookie value
