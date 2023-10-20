@@ -13,7 +13,7 @@ Place a HAR file named `example.har` in the same directory as `main.go`.
 Run the program with the following command:
 
 ```bash
-go run main.go example.har
+go run main.go sanitize example.har
 ```
 
 The program will scan all the cookies in all the requests contained in the HAR file, flag and scramble potential session cookies that could be risky to share, and then save a sanitized version of the HAR file.
