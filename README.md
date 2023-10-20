@@ -14,7 +14,7 @@ go get -u github.com/tidwall/gjson
 ```
 
 ## Usage
-Save the code to a file, for example scan_har.go.
+Save the code to a file, for example `main.go`.
 
 Place a HAR file named `example.har` in the same directory as `main.go`.
 
