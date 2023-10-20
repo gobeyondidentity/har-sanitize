@@ -29,10 +29,19 @@ type Cookie struct {
 }
 
 func main() {
+	// Check if the user has provided a file name argument
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: go run scan_and_scramble_har.go <har_file_name>")
+		os.Exit(1)
+	}
+
+	// The first argument is the name of the HAR file
+	harFileName := os.Args[1]
+
 	// Read the HAR file into a byte array
-	fileBytes, err := ioutil.ReadFile("example.har")
+	fileBytes, err := ioutil.ReadFile(harFileName)
 	if err != nil {
-		fmt.Println("Error reading file:", err)
+		fmt.Printf("Error reading file %s: %s\n", harFileName, err)
 		os.Exit(1)
 	}
 
@@ -44,21 +53,43 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Iterate through all cookies and flag potential session cookies
-	for _, entry := range harFile.Log.Entries {
-		for _, cookie := range entry.Request.Cookies {
+	// Iterate through all cookies and flag (and scramble) potential session cookies
+	for i, entry := range harFile.Log.Entries {
+		for j, cookie := range entry.Request.Cookies {
 			if isSessionCookie(cookie.Name) {
-				fmt.Printf("Unsafe to share: %s=%s\n", cookie.Name, cookie.Value)
+				fmt.Printf("Unsafe to share, scrambling: %s=%s\n", cookie.Name, cookie.Value)
+				harFile.Log.Entries[i].Request.Cookies[j].Value = scrambleCookieValue(cookie.Value)
 			}
 		}
 	}
+
+	// Serialize the modified HAR file back to JSON
+	modifiedBytes, err := json.MarshalIndent(harFile, "", "  ")
+	if err != nil {
+		fmt.Println("Error serializing to JSON:", err)
+		os.Exit(1)
+	}
+
+	// Write the modified HAR file back to disk
+	err = ioutil.WriteFile("safe_to_share.har", modifiedBytes, 0644)
+	if err != nil {
+		fmt.Println("Error writing file:", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Modified HAR file has been saved as safe_to_share.har")
 }
 
-// A simplistic function to check if a cookie name suggests it's a session cookie
+// A function to check if a cookie name suggests it's a session cookie
 func isSessionCookie(name string) bool {
-	// Here, we're just doing a very basic string match. You'd probably want a more robust way
-	// to identify session cookies, perhaps even a list of known session cookie names
-	// or regular expressions.
 	return name == "SESSIONID" || name == "JSESSIONID" || name == "ASP.NET_SessionId"
 }
 
+// A function to scramble a cookie value
+func scrambleCookieValue(value string) string {
+	bytes := []byte(value)
+	for i := range bytes {
+		bytes[i] = byte('X')
+	}
+	return string(bytes)
+}
