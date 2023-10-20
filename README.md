@@ -16,7 +16,7 @@ Run the program with the following command:
 go run main.go example.har
 ```
 
-The program will scan all the cookies in all requests contained in the HAR file and flag potential session cookies that could be risky to share.
+The program will scan all the cookies in all the requests contained in the HAR file, flag and scramble potential session cookies that could be risky to share, and then save a sanitized version of the HAR file.
 
 ## Example Output
 
