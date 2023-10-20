@@ -31,7 +31,7 @@ type Cookie struct {
 func main() {
 	// Check if the user has provided a file name argument
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run scan_and_scramble_har.go <har_file_name>")
+		fmt.Println("Usage: go run main.go <har_file_name>")
 		os.Exit(1)
 	}
 
