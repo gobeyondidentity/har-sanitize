@@ -1,6 +1,6 @@
 # HAR File Session Cookie Scanner
 ## Background
-This program was developed in response to a security incident disclosed by Okta, where an adversary was able to access HAR (HTTP Archive) files shared by Okta's customers with their Customer Support team. These HAR files may have included sensitive session cookies, which could be exploited to hijack user sessions. The incident highlights the importance of scrutinizing the contents of HAR files before sharing them with third parties, even for debugging or customer support purposes.
+This program was developed in response to a [security incident disclosed by Okta](https://krebsonsecurity.com/2023/10/hackers-stole-access-tokens-from-oktas-support-unit/), where an adversary was able to access HAR (HTTP Archive) files shared by Okta's customers with their Customer Support team. These HAR files may have included sensitive session cookies, which could be exploited to hijack user sessions. The incident highlights the importance of scrutinizing the contents of HAR files before sharing them with third parties, even for debugging or customer support purposes.
 
 ## Purpose
 This tool scans HAR files to identify potential session cookies that may be unsafe to share with third parties. By flagging these cookies, the program aims to prevent the inadvertent sharing of sensitive information.
