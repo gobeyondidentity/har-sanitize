@@ -25,3 +25,14 @@ go run main.go
 ```
 
 The program will scan all the cookies in all requests contained in the HAR file and flag potential session cookies that could be risky to share.
+
+## Example Output
+
+The program will print any risky session cookies: 
+
+```bash
+go run main.go
+Unsafe to share: JSESSIONID=CBF969ABF6B1101DC5A9636425425272
+Unsafe to share: JSESSIONID=B6DCo89873987234JSDJLHCK32323233
+...
+```
