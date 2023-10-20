@@ -1,1 +1,27 @@
-# ok-to-send-this-har-to-okta
+# HAR File Session Cookie Scanner
+## Background
+This program was developed in response to a security incident disclosed by Okta, where an adversary was able to access HAR (HTTP Archive) files shared by Okta's customers with their Customer Support team. These HAR files may have included sensitive session cookies, which could be exploited to hijack user sessions. The incident highlights the importance of scrutinizing the contents of HAR files before sharing them with third parties, even for debugging or customer support purposes.
+
+## Purpose
+This tool scans HAR files to identify potential session cookies that may be unsafe to share with third parties. By flagging these cookies, the program aims to prevent the inadvertent sharing of sensitive information.
+
+## Requirements
+Go 1.x
+Optional: gjson package for extended functionality. To install, run:
+
+```bash
+go get -u github.com/tidwall/gjson
+```
+
+##Usage
+Save the code to a file, for example scan_har.go.
+
+Place a HAR file named example.har in the same directory as scan_har.go.
+
+Run the program with the following command:
+
+```bash
+go run scan_har.go
+```
+
+The program will scan all the cookies in all requests contained in the HAR file and flag potential session cookies that could be risky to share.
