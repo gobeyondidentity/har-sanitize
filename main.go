@@ -267,82 +267,6 @@ func isSessionCookie(name string) bool {
 	return false
 }
 
-func compareMaps(map1, map2 map[string]interface{}, prefix string) {
-	for k1, v1 := range map1 {
-		v2, ok := map2[k1]
-		newPrefix := prefix + k1 + "."
-
-		if !ok {
-			fmt.Printf("Key missing in second map: %s%s\n", prefix, k1)
-			continue
-		}
-
-		switch v1Typed := v1.(type) {
-		case map[string]interface{}:
-			v2Typed, ok := v2.(map[string]interface{})
-			if !ok {
-				fmt.Printf("Type mismatch: %s%s\n", prefix, k1)
-				continue
-			}
-			compareMaps(v1Typed, v2Typed, newPrefix)
-
-		case []interface{}:
-			v2Typed, ok := v2.([]interface{})
-			if !ok {
-				fmt.Printf("Type mismatch: %s%s\n", prefix, k1)
-				continue
-			}
-			compareSlices(v1Typed, v2Typed, newPrefix)
-
-		default:
-			if v1 != v2 {
-				fmt.Printf("Value mismatch at %s%s: %v != %v\n", prefix, k1, v1, v2)
-			}
-		}
-	}
-
-	for k2 := range map2 {
-		if _, ok := map1[k2]; !ok {
-			//fmt.Printf("Key missing in first map: %s%s\n", prefix, k2)
-		}
-	}
-}
-
-func compareSlices(slice1, slice2 []interface{}, prefix string) {
-	if len(slice1) != len(slice2) {
-		fmt.Printf("Slice length mismatch at %s: %d != %d\n", prefix, len(slice1), len(slice2))
-		return
-	}
-
-	for i, v1 := range slice1 {
-		v2 := slice2[i]
-		newPrefix := fmt.Sprintf("%s[%d].", prefix, i)
-
-		switch v1Typed := v1.(type) {
-		case map[string]interface{}:
-			v2Typed, ok := v2.(map[string]interface{})
-			if !ok {
-				fmt.Printf("Type mismatch in slice at %s\n", newPrefix)
-				continue
-			}
-			compareMaps(v1Typed, v2Typed, newPrefix)
-
-		case []interface{}:
-			v2Typed, ok := v2.([]interface{})
-			if !ok {
-				fmt.Printf("Type mismatch in slice at %s\n", newPrefix)
-				continue
-			}
-			compareSlices(v1Typed, v2Typed, newPrefix)
-
-		default:
-			if v1 != v2 {
-				fmt.Printf("Value mismatch in slice at %s: %v != %v\n", newPrefix, v1, v2)
-			}
-		}
-	}
-}
-
 func sanitizeHeaders(headers []Header) []Header {
 	sanitizedHeaders := []Header{}
 	// List of sensitive headers that should not be shared
@@ -370,15 +294,37 @@ func sanitizeHeaders(headers []Header) []Header {
 	return sanitizedHeaders
 }
 
+func sanitizeHar(harFile Har) {
+	for i, entry := range harFile.Log.Entries {
+
+		// Sanitize request headers
+		harFile.Log.Entries[i].Request.Headers = sanitizeHeaders(harFile.Log.Entries[i].Request.Headers)
+
+		// Sanitize response headers
+		harFile.Log.Entries[i].Response.Headers = sanitizeHeaders(harFile.Log.Entries[i].Response.Headers)
+
+		for j, cookie := range entry.Request.Cookies {
+			if isSessionCookie(cookie.Name) {
+				fmt.Printf("Unsafe to share in Request, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
+				harFile.Log.Entries[i].Request.Cookies[j].Value = "SANITIZED"
+			}
+		}
+		for j, cookie := range entry.Response.Cookies {
+			if isSessionCookie(cookie.Name) {
+				fmt.Printf("Unsafe to share in Response, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
+				harFile.Log.Entries[i].Response.Cookies[j].Value = "SANITIZED"
+			}
+		}
+	}
+}
+
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run main.go <command> <har_file_name>")
-		fmt.Println("Commands: sanitize, reorder")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: go run main.go <har_file_name>")
 		os.Exit(1)
 	}
 
-	command := os.Args[1]
-	harFileName := os.Args[2]
+	harFileName := os.Args[1]
 
 	fileBytes, err := ioutil.ReadFile(harFileName)
 	if err != nil {
@@ -393,90 +339,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	switch command {
-	case "sanitize":
-		for i, entry := range harFile.Log.Entries {
+	sanitizeHar(harFile)
 
-			// Sanitize request headers
-			harFile.Log.Entries[i].Request.Headers = sanitizeHeaders(harFile.Log.Entries[i].Request.Headers)
-
-			// Sanitize response headers
-			harFile.Log.Entries[i].Response.Headers = sanitizeHeaders(harFile.Log.Entries[i].Response.Headers)
-
-			for j, cookie := range entry.Request.Cookies {
-				if isSessionCookie(cookie.Name) {
-					fmt.Printf("Unsafe to share in Request, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
-					harFile.Log.Entries[i].Request.Cookies[j].Value = "SANITIZED"
-				}
-			}
-			for j, cookie := range entry.Response.Cookies {
-				if isSessionCookie(cookie.Name) {
-					fmt.Printf("Unsafe to share in Response, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
-					harFile.Log.Entries[i].Response.Cookies[j].Value = "SANITIZED"
-				}
-			}
-		}
-
-		modifiedBytes, err := json.MarshalIndent(harFile, "", "  ")
-		if err != nil {
-			fmt.Printf("Error serializing to JSON: %s\n", err)
-			os.Exit(1)
-		}
-
-		modifiedFileName := "modified_" + harFileName
-		err = ioutil.WriteFile(modifiedFileName, modifiedBytes, 0644)
-		if err != nil {
-			fmt.Printf("Error writing file: %s\n", err)
-			os.Exit(1)
-		}
-
-		fmt.Printf("Modified HAR file has been saved as %s\n", modifiedFileName)
-
-	case "reorder":
-		orderedBytes, err := json.MarshalIndent(harFile, "", "  ")
-		if err != nil {
-			fmt.Printf("Error serializing to JSON: %s\n", err)
-			os.Exit(1)
-		}
-
-		orderedFileName := "example_ordered.har"
-		err = ioutil.WriteFile(orderedFileName, orderedBytes, 0644)
-		if err != nil {
-			fmt.Printf("Error writing file: %s\n", err)
-			os.Exit(1)
-		}
-
-		fmt.Printf("Ordered HAR file has been saved as %s\n", orderedFileName)
-
-	case "compare":
-		if len(os.Args) < 4 {
-			fmt.Println("Usage for compare: go run main.go compare <json_file1_name> <json_file2_name>")
-			os.Exit(1)
-		}
-
-		jsonFileName1 := os.Args[2]
-		jsonFileName2 := os.Args[3]
-
-		file1Bytes, err := ioutil.ReadFile(jsonFileName1)
-		if err != nil {
-			fmt.Printf("Error reading file %s: %s\n", jsonFileName1, err)
-			os.Exit(1)
-		}
-
-		file2Bytes, err := ioutil.ReadFile(jsonFileName2)
-		if err != nil {
-			fmt.Printf("Error reading file %s: %s\n", jsonFileName2, err)
-			os.Exit(1)
-		}
-
-		var obj1, obj2 map[string]interface{}
-		json.Unmarshal(file1Bytes, &obj1)
-		json.Unmarshal(file2Bytes, &obj2)
-
-		compareMaps(obj1, obj2, "")
-
-	default:
-		fmt.Println("Invalid command. Use 'sanitize', 'reorder' or 'compare'")
+	modifiedBytes, err := json.MarshalIndent(harFile, "", "  ")
+	if err != nil {
+		fmt.Printf("Error serializing to JSON: %s\n", err)
 		os.Exit(1)
 	}
+
+	modifiedFileName := "sanitized_" + harFileName
+	err = ioutil.WriteFile(modifiedFileName, modifiedBytes, 0644)
+	if err != nil {
+		fmt.Printf("Error writing file: %s\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Modified HAR file has been saved as %s\n", modifiedFileName)
 }

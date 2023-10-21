@@ -5,6 +5,17 @@ This program was developed in response to a [security incident disclosed by Okta
 ## Purpose
 This tool scans HAR files to identify potential session cookies that may be unsafe to share with third parties. By flagging these cookies, the program aims to prevent the inadvertent sharing of sensitive information.
 
+## Installation
+### From Source
+No dependencies are needed. Simply download the main.go file.
+
+### Pre-Built Release
+Alternatively, you can download a pre-built release from the [Releases](https://github.com/nmelo/ok-to-send-this-har-to-okta/releases) page. Once downloaded, change permissions to executable and run: 
+
+```bash
+santize_har <har_file_name>
+```
+
 ## Usage
 Save the code to a file, for example `main.go`.
 
@@ -13,7 +24,7 @@ Place a HAR file named `example.har` in the same directory as `main.go`.
 Run the program with the following command:
 
 ```bash
-go run main.go sanitize example.har
+go run main.go example.har
 ```
 
 The program will scan all the cookies in all the requests contained in the HAR file, flag and scramble potential session cookies that could be risky to share, and then save a sanitized version of the HAR file.
