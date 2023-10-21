@@ -343,6 +343,32 @@ func compareSlices(slice1, slice2 []interface{}, prefix string) {
 	}
 }
 
+func sanitizeHeaders(headers []Header) []Header {
+	sanitizedHeaders := []Header{}
+	// List of sensitive headers that should not be shared
+	sensitiveHeaders := map[string]bool{
+		"Authorization": true,
+		"authorization": true,
+		"Cookie":        true,
+		"cookie":        true,
+		"Set-Cookie":    true,
+		"set-cookie":    true,
+		// Add more headers to sanitize here
+	}
+
+	for _, header := range headers {
+		if _, isSensitive := sensitiveHeaders[header.Name]; isSensitive {
+			// Skip sensitive headers
+			continue
+		} else {
+			// Keep non-sensitive headers
+			sanitizedHeaders = append(sanitizedHeaders, header)
+		}
+	}
+
+	return sanitizedHeaders
+}
+
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: go run main.go <command> <har_file_name>")
@@ -369,6 +395,13 @@ func main() {
 	switch command {
 	case "sanitize":
 		for i, entry := range harFile.Log.Entries {
+
+			// Sanitize request headers
+			harFile.Log.Entries[i].Request.Headers = sanitizeHeaders(harFile.Log.Entries[i].Request.Headers)
+
+			// Sanitize response headers
+			harFile.Log.Entries[i].Response.Headers = sanitizeHeaders(harFile.Log.Entries[i].Response.Headers)
+
 			for j, cookie := range entry.Request.Cookies {
 				if isSessionCookie(cookie.Name) {
 					fmt.Printf("Unsafe to share in Request, scrambling: %s=%s\n", cookie.Name, cookie.Value)
