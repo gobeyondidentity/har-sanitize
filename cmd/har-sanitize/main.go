@@ -79,7 +79,7 @@ func sanitizeHar(harFile har.Har) {
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run main.go <har_file_name>")
+		fmt.Println("Usage: har-sanitize <har_file_name>")
 		os.Exit(1)
 	}
 
