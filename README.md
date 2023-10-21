@@ -14,7 +14,7 @@ No dependencies are needed. Simply clone the repo and compile the `cmd/main.go` 
 Run go install: 
 ```go install github.com/nmelo/har-sanitize/cmd/har-sanitize@latest```
 
-the `har-sanitize` command will be built and installed in your `~go/bin`. Now you can run `har-sanitze <har_file_name>`. 
+the `har-sanitize` command will be built and installed in your `~/go/bin`. Now you can run `har-sanitze <har_file_name>`. 
 
 ### Pre-Built Release
 Alternatively, you can download a pre-built release from the [Releases](https://github.com/nmelo/ok-to-send-this-har-to-okta/releases) page. Once downloaded, change permissions to executable and run: 
