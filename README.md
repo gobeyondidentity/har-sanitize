@@ -7,7 +7,7 @@ This tool scans HAR files to identify potential session cookies that may be unsa
 
 ## Installation
 ### From Source
-No dependencies are needed. Simply download the main.go file.
+No dependencies are needed. Simply clone the repo and compile the `cmd/main.go` file.
 
 ### Pre-Built Release
 Alternatively, you can download a pre-built release from the [Releases](https://github.com/nmelo/ok-to-send-this-har-to-okta/releases) page. Once downloaded, change permissions to executable and run: 
@@ -24,7 +24,7 @@ Place a HAR file named `example.har` in the same directory as `main.go`.
 Run the program with the following command:
 
 ```bash
-go run main.go example.har
+go run cmd/main.go example.har
 ```
 
 The program will scan all the cookies in all the requests contained in the HAR file, flag and scramble potential session cookies that could be risky to share, and then save a sanitized version of the HAR file.
@@ -34,7 +34,7 @@ The program will scan all the cookies in all the requests contained in the HAR f
 The program will print any risky session cookies: 
 
 ```bash
-go run main.go
+go run cmd/main.go example.har
 Unsafe to share: JSESSIONID=CBF969ABF6B1101DC5A9636425425272
 Unsafe to share: JSESSIONID=B6DCo89873987234JSDJLHCK32323233
 Modified HAR file has been saved as safe_to_share.har
