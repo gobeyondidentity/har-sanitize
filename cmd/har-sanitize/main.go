@@ -42,7 +42,7 @@ func sanitizeHeaders(headers []har.Header) []har.Header {
 	for _, header := range headers {
 		if _, isSensitive := sensitiveHeaders[header.Name]; isSensitive {
 			// Skip sensitive headers
-			fmt.Printf("Unsafe to include header, removing: %s=%s\n", header.Name, header.Value)
+			fmt.Printf("Unsafe header found, removing: \u001B[33m %s \u001B[0m = \u001B[32m %s \u001B[0m\n", header.Name, header.Value)
 			continue
 		} else {
 			// Keep non-sensitive headers
@@ -54,6 +54,7 @@ func sanitizeHeaders(headers []har.Header) []har.Header {
 }
 
 func sanitizeHar(harFile har.Har) {
+
 	for i, entry := range harFile.Log.Entries {
 
 		// Sanitize request headers
@@ -64,13 +65,13 @@ func sanitizeHar(harFile har.Har) {
 
 		for j, cookie := range entry.Request.Cookies {
 			if isSessionCookie(cookie.Name) {
-				fmt.Printf("Unsafe to share in Request, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
+				fmt.Printf("Unsafe cookie found in Request, sanitizing: \u001B[33m %s \u001B[0m = \u001B[32m %s \u001B[0m\n", cookie.Name, cookie.Value)
 				harFile.Log.Entries[i].Request.Cookies[j].Value = "SANITIZED"
 			}
 		}
 		for j, cookie := range entry.Response.Cookies {
 			if isSessionCookie(cookie.Name) {
-				fmt.Printf("Unsafe to share in Response, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
+				fmt.Printf("Unsafe cookie found in Response, sanitizing: \u001B[33m %s \u001B[0m = \033[32m %s \u001B[0m\n", cookie.Name, cookie.Value)
 				harFile.Log.Entries[i].Response.Cookies[j].Value = "SANITIZED"
 			}
 		}
@@ -113,5 +114,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Modified HAR file has been saved as %s\n", modifiedFileName)
+	fmt.Printf("\n\033[32mModified HAR file has been saved as:\u001B[0m %s\n", modifiedFileName)
 }
