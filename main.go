@@ -359,6 +359,7 @@ func sanitizeHeaders(headers []Header) []Header {
 	for _, header := range headers {
 		if _, isSensitive := sensitiveHeaders[header.Name]; isSensitive {
 			// Skip sensitive headers
+			fmt.Printf("Unsafe to include header, removing: %s=%s\n", header.Name, header.Value)
 			continue
 		} else {
 			// Keep non-sensitive headers
@@ -404,13 +405,13 @@ func main() {
 
 			for j, cookie := range entry.Request.Cookies {
 				if isSessionCookie(cookie.Name) {
-					fmt.Printf("Unsafe to share in Request, scrambling: %s=%s\n", cookie.Name, cookie.Value)
+					fmt.Printf("Unsafe to share in Request, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
 					harFile.Log.Entries[i].Request.Cookies[j].Value = "SANITIZED"
 				}
 			}
 			for j, cookie := range entry.Response.Cookies {
 				if isSessionCookie(cookie.Name) {
-					fmt.Printf("Unsafe to share in Response, scrambling: %s=%s\n", cookie.Name, cookie.Value)
+					fmt.Printf("Unsafe to share in Response, sanitizing: %s=%s\n", cookie.Name, cookie.Value)
 					harFile.Log.Entries[i].Response.Cookies[j].Value = "SANITIZED"
 				}
 			}
