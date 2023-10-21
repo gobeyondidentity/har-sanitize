@@ -24,24 +24,24 @@ santize_har <har_file_name>
 ```
 
 ## Usage
-Save the code to a file, for example `main.go`.
+Clone the repo: 
+```git clone github.com/nmelo/har-sanitize```
 
-Place a HAR file named `example.har` in the same directory as `main.go`.
 
 Run the program with the following command:
 
 ```bash
-go run cmd/main.go example.har
+go run cmd/har-sanitize/main.go <har_file_path>
 ```
 
-The program will scan all the cookies in all the requests contained in the HAR file, flag and scramble potential session cookies that could be risky to share, and then save a sanitized version of the HAR file.
+The program will scan all the cookies and headers in all the requests contained in the HAR file, flag and scramble potential session cookies that could be risky to share, and then save a sanitized version of the HAR file.
 
 ## Example Output
 
 The program will print any risky session cookies: 
 
 ```bash
-go run cmd/main.go example.har
+go run cmd/har-sanitize/main.go example.har
 Unsafe to share: JSESSIONID=CBF969ABF6B1101DC5A9636425425272
 Unsafe to share: JSESSIONID=B6DCo89873987234JSDJLHCK32323233
 Modified HAR file has been saved as safe_to_share.har
