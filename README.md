@@ -1,4 +1,4 @@
-# HAR File Session Cookie Scanner
+# HAR File Sanitizer
 ## Background
 This program was created in response to a [security incident disclosed by Okta](https://krebsonsecurity.com/2023/10/hackers-stole-access-tokens-from-oktas-support-unit/), where an adversary was able to access HAR (HTTP Archive) files shared by Okta's customers with their Customer Support team. These HAR files may have included sensitive session cookies, which could be exploited to hijack user sessions. The incident highlights the importance of scrutinizing the contents of HAR files before sharing them with third parties, even for debugging or customer support purposes.
 
