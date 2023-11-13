@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nmelo/har-sanitize/har"
-	"io/ioutil"
 	"os"
 )
 
@@ -27,7 +26,7 @@ func isSessionCookie(name string) bool {
 }
 
 func sanitizeHeaders(headers []har.Header) []har.Header {
-	sanitizedHeaders := []har.Header{}
+	var sanitizedHeaders []har.Header
 	// List of sensitive headers that should not be shared
 	sensitiveHeaders := map[string]bool{
 		"Authorization": true,
@@ -86,7 +85,7 @@ func main() {
 
 	harFileName := os.Args[1]
 
-	fileBytes, err := ioutil.ReadFile(harFileName)
+	fileBytes, err := os.ReadFile(harFileName)
 	if err != nil {
 		fmt.Printf("Error reading file %s: %s\n", harFileName, err)
 		os.Exit(1)
@@ -108,7 +107,7 @@ func main() {
 	}
 
 	modifiedFileName := "sanitized_" + harFileName
-	err = ioutil.WriteFile(modifiedFileName, modifiedBytes, 0644)
+	err = os.WriteFile(modifiedFileName, modifiedBytes, 0644)
 	if err != nil {
 		fmt.Printf("Error writing file: %s\n", err)
 		os.Exit(1)
